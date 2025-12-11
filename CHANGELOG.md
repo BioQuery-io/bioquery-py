@@ -1,3 +1,10 @@
+## [1.0.2](https://github.com/BioQuery-io/bioquery-py/compare/v1.0.1...v1.0.2) (2025-12-11)
+
+
+### Bug Fixes
+
+* prevent semantic-release from corrupting tool config versions ([b48580e](https://github.com/BioQuery-io/bioquery-py/commit/b48580e6740811e65aa82c6e8b506b517575ce81))
+
 ## [1.0.1](https://github.com/BioQuery-io/bioquery-py/compare/v1.0.0...v1.0.1) (2025-12-11)
 
 
