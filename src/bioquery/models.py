@@ -99,4 +99,6 @@ class QueryCard(BaseModel):
         return self.statistics.get("effect_size")
 
     def __repr__(self) -> str:
-        return f"QueryCard(card_id='{self.card_id}', question='{self.question[:50]}...')"
+        return (
+            f"QueryCard(card_id='{self.card_id}', question='{self.question[:50]}...')"
+        )
