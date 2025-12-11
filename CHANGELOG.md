@@ -1,3 +1,10 @@
+# 1.0.0 (2025-12-11)
+
+
+### Bug Fixes
+
+* resolve ruff lint errors ([944e3b5](https://github.com/BioQuery-io/bioquery-py/commit/944e3b576391254f8a7cceb53a169bf33bf92a66))
+
 # Changelog
 
 All notable changes to the BioQuery Python SDK will be documented in this file.
