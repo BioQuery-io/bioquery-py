@@ -20,7 +20,7 @@ def main() -> None:
 
     # Access statistics
     if card.statistics:
-        print(f"\nStatistics:")
+        print("\nStatistics:")
         print(f"  P-value: {card.p_value}")
         print(f"  Effect size: {card.effect_size}")
 

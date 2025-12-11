@@ -9,7 +9,6 @@ import httpx
 
 from bioquery.exceptions import (
     AuthenticationError,
-    BioQueryError,
     QueryError,
     RateLimitError,
 )

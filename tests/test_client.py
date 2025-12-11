@@ -1,7 +1,5 @@
 """Tests for BioQuery client."""
 
-import pytest
-
 from bioquery import Client
 
 
