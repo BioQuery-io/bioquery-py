@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "bioquery"
-version = "1.0.0"
+version = "1.0.1"
 description = "Python client for BioQuery - natural language cancer genomics queries"
 readme = "README.md"
 license = "MIT"
@@ -64,7 +64,7 @@ profile = "black"
 line_length = 88
 
 [tool.mypy]
-python_version = "3.9"
+python_version = "1.0.1"
 strict = true
 warn_return_any = true
 warn_unused_ignores = true
@@ -75,4 +75,4 @@ asyncio_mode = "auto"
 
 [tool.ruff]
 line-length = 88
-target-version = "py39"
+target-version = "1.0.1"

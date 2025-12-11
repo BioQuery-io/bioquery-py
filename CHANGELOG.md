@@ -1,3 +1,10 @@
+## [1.0.1](https://github.com/BioQuery-io/bioquery-py/compare/v1.0.0...v1.0.1) (2025-12-11)
+
+
+### Bug Fixes
+
+* restore corrupted pyproject.toml python versions ([3075bf8](https://github.com/BioQuery-io/bioquery-py/commit/3075bf87a834b7758a89eb239a8cfc3da7aef060))
+
 # 1.0.0 (2025-12-11)
 
 
