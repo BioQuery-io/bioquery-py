@@ -1,1 +1,1 @@
-"""BioQuery SDK tests."""
+"""Tests for bioquery-agents package."""

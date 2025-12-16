@@ -3,6 +3,9 @@ __pycache__/
 *.py[cod]
 *$py.class
 
+# C extensions
+*.so
+
 # Distribution / packaging
 .Python
 build/
@@ -21,6 +24,14 @@ wheels/
 .installed.cfg
 *.egg
 
+# PyInstaller
+*.manifest
+*.spec
+
+# Installer logs
+pip-log.txt
+pip-delete-this-directory.txt
+
 # Unit test / coverage reports
 htmlcov/
 .tox/
@@ -31,28 +42,38 @@ htmlcov/
 nosetests.xml
 coverage.xml
 *.cover
+*.py,cover
+.hypothesis/
 .pytest_cache/
+
+# Translations
+*.mo
+*.pot
 
 # Environments
 .env
-.env.local
 .venv
 env/
 venv/
 ENV/
+env.bak/
+venv.bak/
 
 # IDE
-.vscode/
 .idea/
+.vscode/
 *.swp
 *.swo
 *~
 
-# macOS
-.DS_Store
-
 # mypy
 .mypy_cache/
+.dmypy.json
+dmypy.json
 
 # ruff
 .ruff_cache/
+
+# OS
+.DS_Store
+Thumbs.db

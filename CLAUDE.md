@@ -1,148 +1,137 @@
-# BioQuery Python SDK
+# bioquery-agents
 
-Python client library for the BioQuery API.
+Lightweight graph-based agent orchestration for Python.
 
-## Installation
-
-```bash
-pip install bioquery
-```
-
-## Quick Start
-
-```python
-import bioquery
-
-# Initialize client
-client = bioquery.Client(api_key="your-api-key")
-
-# Submit a query
-card = client.query("Is DDR1 expression higher in KIRP vs KIRC?")
-
-# Access results
-print(card.answer)
-print(card.statistics)
-
-# Get the plot
-card.show_figure()
-card.save_figure("ddr1_comparison.png")
-
-# Export data
-card.to_dataframe()
-card.to_json()
-```
+**Repository:** Private (BioQuery-io/bioquery-agents)
 
 ## Project Structure
 
 ```
-sdk-python/
-├── src/
-│   └── bioquery/
-│       ├── __init__.py        # Package exports
-│       ├── client.py          # BioQueryClient class
-│       ├── models.py          # Pydantic models (QueryCard, etc.)
-│       ├── exceptions.py      # Custom exceptions
-│       └── utils.py           # Helper functions
+agents/
+├── src/bioquery_agents/
+│   ├── __init__.py        # Package exports
+│   ├── graph.py           # StateGraph, Node, Edge, NodeStatus
+│   ├── retry.py           # RetryPolicy
+│   ├── checkpoint.py      # Checkpointer ABC, MemoryCheckpointer
+│   ├── middleware.py      # AgentMiddleware, MiddlewareStack
+│   ├── planning.py        # PlanningLoop, Todo, TodoStatus
+│   ├── subgraph.py        # SubgraphExecutor, SubgraphBuilder
+│   └── consultants/       # Domain expert consultants (ADR-0013)
+│       ├── __init__.py
+│       ├── base.py        # DomainConsultant base class
+│       ├── definitions.py # Consultant prompts (proprietary)
+│       ├── orchestrator.py # ConsultantOrchestrator
+│       ├── schemas.py     # Request/response models
+│       └── tool.py        # consult_expert tool definition
 ├── tests/
-│   ├── __init__.py
-│   ├── test_client.py
-│   └── test_models.py
-├── examples/
-│   └── basic_usage.py
-├── pyproject.toml             # Package metadata & dependencies
-├── README.md
-├── LICENSE
-└── CLAUDE.md                  # This file
+│   ├── test_graph.py
+│   ├── test_checkpoint.py
+│   ├── test_consultants.py  # 38 tests for consultants
+│   └── ...
+├── pyproject.toml
+└── README.md
 ```
 
-## Key Classes
+## Key Components
 
-### BioQueryClient (`src/bioquery/client.py`)
-Main client for API interaction:
-- `query(question: str) -> QueryCard` - Submit natural language query
-- `get_card(card_id: str) -> QueryCard` - Retrieve existing card
-- `stream_query(question: str, callback) -> QueryCard` - Stream with progress
+| Component | Purpose |
+|-----------|---------|
+| `StateGraph` | Directed graph for agent execution with conditional routing |
+| `RetryPolicy` | Exponential backoff with configurable exception handling |
+| `Checkpointer` | State persistence for resumable execution |
+| `AgentMiddleware` | Composable extensions for tool interception |
+| `PlanningLoop` | Multi-step task decomposition and tracking |
+| `SubgraphExecutor` | Isolated execution for parallel sub-queries |
+| `consultants` | Domain expert agents for statistics, clinical, immunology, genomics |
 
-### QueryCard (`src/bioquery/models.py`)
-Represents a Query Card result:
-- `card_id: str` - Unique identifier
-- `question: str` - Original question
-- `answer: str` - Natural language answer
-- `interpretation: str` - How BioQuery understood the query
-- `figure: PlotlyFigure` - Interactive visualization
-- `statistics: dict` - Statistical results
-- `sql_query: str` - Executed BigQuery SQL
-- `methods_text: str` - Grant-ready methods
+## Design Principles
 
-Methods:
-- `show_figure()` - Display in notebook
-- `save_figure(path, format)` - Export figure
-- `to_dataframe()` - Get data as pandas DataFrame
-- `to_json()` - Export full card as JSON
+1. **Zero LLM dependencies** - Core package has no LangChain, OpenAI, or Anthropic SDKs
+2. **Minimal external deps** - Only `pydantic>=2.0` for core; `anthropic` optional for consultants
+3. **Async-first** - All operations are async
+4. **Type-safe** - Full type hints, mypy strict
+5. **Protocol-based** - ABCs for Checkpointer, AgentMiddleware
 
-## Development
+## Consultants Module
+
+The `consultants` subpackage provides domain expert agents (ADR-0013):
+
+```python
+from bioquery_agents.consultants import get_orchestrator
+
+orchestrator = get_orchestrator()
+
+# Single consultation
+response = await orchestrator.consult(
+    consultant_name="statistics",
+    question="What test for comparing two groups?",
+    context={"n_samples": 50},
+)
+
+# Parallel consultation
+responses = await orchestrator.consult_parallel(
+    consultant_names=["statistics", "clinical"],
+    question="Reviewing survival analysis",
+    context={"analysis_type": "survival"},
+)
+
+# Auto-detect which consultants to use
+recommended = orchestrator.should_consult("survival_analysis", context)
+```
+
+**Available consultants:**
+- `statistics` - Test selection, multiple testing, effect sizes
+- `clinical` - Staging, treatment context, clinical significance
+- `immunology` - TME, checkpoints, immunotherapy signatures
+- `genomics` - Gene function, pathways, variant interpretation
+
+## Quick Commands
 
 ```bash
-# Setup
-python -m venv venv
-source venv/bin/activate
+# Install for development
 pip install -e ".[dev]"
 
 # Run tests
 pytest
 
-# Format code
-black src tests
-isort src tests
+# Run with coverage
+pytest --cov=bioquery_agents
 
-# Type check
-mypy src
+# Type checking
+mypy src/
+
+# Linting
+ruff check src/ tests/
+
+# Format
+ruff format src/ tests/
 ```
 
-## API Endpoints Used
+## Usage in BioQuery API
 
-| Method | Path | Description |
-|--------|------|-------------|
-| POST | `/query` | Submit query |
-| GET | `/cards/{id}` | Get card by ID |
-
-## Environment Variables
-
-```bash
-BIOQUERY_API_KEY=your-api-key
-BIOQUERY_API_URL=https://api.bioquery.io  # Optional, defaults to production
-```
-
-## Publishing
-
-```bash
-# Build
-python -m build
-
-# Upload to PyPI
-python -m twine upload dist/*
-```
-
-## Error Handling
+This package is used by the BioQuery API for query orchestration:
 
 ```python
-from bioquery.exceptions import (
-    BioQueryError,        # Base exception
-    AuthenticationError,  # Invalid API key
-    QueryError,           # Query processing failed
-    RateLimitError,       # Too many requests
-)
+# In api/app/orchestration/bioquery_graph.py
+from bioquery_agents import StateGraph, RetryPolicy
+from bioquery_agents.checkpoint import SupabaseCheckpointer  # Custom impl
+
+graph = StateGraph()
+graph.add_node("parse", parse_query, retry_policy=CLAUDE_RETRY)
+graph.add_node("validate", validate_inputs)
+graph.add_node("fetch", fetch_data, retry_policy=BIGQUERY_RETRY)
+# ...
 ```
 
-## Async Support
+## Related Documentation
 
-```python
-import asyncio
-from bioquery import AsyncClient
+- [ADR-0012: Graph-Based Orchestration](https://github.com/BioQuery-io/.github-private/wiki/ADR-0012-Graph-Based-Orchestration)
+- [ADR-0011: Advanced API and Agent Patterns](https://github.com/BioQuery-io/.github-private/wiki/ADR-0011-Advanced-API-and-Agent-Patterns)
 
-async def main():
-    client = AsyncClient(api_key="...")
-    card = await client.query("...")
+## CI/CD
 
-asyncio.run(main())
-```
+- **GitHub Actions**: Runs on push/PR to main
+- **Tests**: pytest with coverage on Python 3.11, 3.12
+- **Linting**: ruff check + format
+- **Type checking**: mypy strict
+- **Publishing**: Auto-publish to PyPI on version bump
